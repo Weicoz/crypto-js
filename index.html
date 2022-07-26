@@ -29,13 +29,14 @@
     var key = ''  //秘钥
     var mid = ''     //拼接字符串
     var device = ''     //设备号
-    var suffix = '..;'
+    var suffix = ''
 
     $(function () {
         text = getQueryString('text')
         key = getQueryString('key')
         mid = getQueryString('mid')
         device = getQueryString('device')
+        suffix = getQueryString('suffix')
         if (text){
             pushPass()
         }
