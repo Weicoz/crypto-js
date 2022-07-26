@@ -1,0 +1,129 @@
+<html>
+<head>
+    <title>PW</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<div>
+    <span>PA:</span>
+    <input type="text" value="" onchange="check(this)">
+    <button class="btn" type="button" onclick="copy()">复制</button></button>
+    <button type="button" onclick="send(text)">发送</button>
+    <span id="text"></span>
+</div>
+<div>
+    <span>Send:</span>
+    <input id="copyText" type="text" value="" onchange="">
+    <button type="button" onclick="send($('#copyText').val(), 'text')">发送</button>
+</div>
+
+
+</body>
+<script type="text/javascript">
+    var link = '';
+    var text = '';
+
+    var key = ''  //秘钥
+    var mid = ''     //拼接字符串
+    var device = ''     //设备号
+    var suffix = '..;'
+
+    $(function () {
+        text = getQueryString('text')
+        key = getQueryString('key')
+        mid = getQueryString('mid')
+        device = getQueryString('device')
+        if (text){
+            pushPass()
+        }
+    });
+
+
+    function check(elm){
+        text = $(elm).val();
+        pushPass()
+    }
+
+    function getDominMid(url){
+        var domain = url.split('/'); //以“/”进行分割
+        if(domain[2]) {
+            domain = domain[2];
+            var domain_mid = domain.split('.');
+            if (domain_mid[1]){
+                domain_mid = domain_mid[1]
+                return domain_mid
+            }
+        }
+        return false
+    }
+
+
+    function getPrefix(){
+        var prefix = null
+        if (link){
+            prefix = getDominMid(link)
+        }else if (text){
+            prefix = text
+        }else {
+
+        }
+        console.log(prefix)
+        return prefix
+    }
+
+
+    function getPass(prefix){
+        let hash = CryptoJS.HmacSHA1(prefix, key).toString().substr(0,8)
+        return prefix + mid + hash + suffix
+    }
+
+
+    function pushPass(){
+        var prefix = getPrefix()
+        var pass = getPass(prefix)
+        if (prefix && pass){
+            text = pass
+            console.log(prefix + ' | 生成 HmacSHA1 成功', pass)
+            $('#text').text(text);
+            setTimeout(function() {
+                copy()
+            }, 1000)
+        }else{
+            if (!prefix){
+                console.log('获取前缀失败', '请分享链接或者复制前缀后进行操作')
+            }else if (!pass){
+                console.log('密码生成失败', '请分享链接或者复制前缀后进行操作')
+            }
+        }
+
+    }
+
+    function getQueryString(name) {
+        let reg = `(^|&)${name}=([^&]*)(&|$)`
+        let r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]); return null;
+    }
+
+
+    function copy(){
+        var dummy = document.createElement('input')
+        document.body.appendChild(dummy);
+        dummy.value = text;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        console.log('复制成功', text)
+    }
+
+    function send(text, type){
+        text = encodeURIComponent(text)
+        $.get('https://api.day.app/' + device + '/' + text + '?automaticallyCopy=1&copy=' + text, '', function(res){
+            console.log('发送成功')
+        })
+    }
+
+</script>
+
+</html>
