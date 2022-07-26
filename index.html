@@ -37,6 +37,9 @@
         mid = getQueryString('mid')
         device = getQueryString('device')
         suffix = getQueryString('suffix')
+        if (!suffix) {
+            suffix = '';
+        }
         if (text){
             pushPass()
         }
@@ -102,10 +105,13 @@
 
     }
 
-    function getQueryString(name) {
+    function getQueryString(name, def) {
         let reg = `(^|&)${name}=([^&]*)(&|$)`
         let r = window.location.search.substr(1).match(reg);
-        if (r != null) return unescape(r[2]); return null;
+        if (r != null) {
+            return unescape(r[2]);
+        }
+        return null;
     }
 
 
